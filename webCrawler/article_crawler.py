@@ -12,7 +12,7 @@ MAX_PAGES = 2 # 爬取的頁數
 OUTPUT_FILE = "basketball_articles.json" # 儲存的檔案名稱
 all_articles = []  # 儲存所有文章資料
 
-def get_article_links(page_num): # 爬取文章連結
+def get_basketball_article_id_from_page(page_num): # 爬取籃球專區的文章ID
     url = f'https://www.sportsv.net/basketball?page={page_num}#latest_articles'
     try:
         res = requests.get(url, headers=HEADERS, timeout=10)
@@ -20,11 +20,34 @@ def get_article_links(page_num): # 爬取文章連結
     except requests.RequestException as e:
         print(f"  第 {page_num} 頁請求失敗：{e}")
         return []
-    
     soup = BeautifulSoup(res.text, 'html.parser')
-    articles = soup.find_all('div', class_='col-md-7')
+    latest_articles_section = soup.find('section', id='latest_articles')
+    articles = latest_articles_section.find_all('div', class_='col-md-7')
 
-    links_with_dates = [] # 儲存文章網址和日期
+    ids = [] # 儲存文章id
+    for article in articles:
+        h3_tag = article.find('h3')
+        if h3_tag:
+            link_tag = h3_tag.find('a')
+            if link_tag and link_tag.get('href'):
+                link = link_tag.get('href')
+                id = get_article_id(link) # 文章ID
+                # if link.startswith('/'):
+                #     link = "https://www.sportsv.net" + link
+                ids.append(id)
+
+    return ids
+
+def get_basketball_article_links(page_num): # 爬取籃球專區的文章連結
+    url = f'https://www.sportsv.net/basketball?page={page_num}#latest_articles'
+    soup = get_article_soup(url) # 獲取頁面內容
+    if soup is None:
+        print(f"  第 {page_num} 頁請求失敗")
+        return []
+    latest_articles_section = soup.find('section', id='latest_articles')
+    articles = latest_articles_section.find_all('div', class_='col-md-7')
+
+    links = [] # 儲存文章網址和日期
     for article in articles:
         h3_tag = article.find('h3')
         if h3_tag:
@@ -33,25 +56,9 @@ def get_article_links(page_num): # 爬取文章連結
                 link = link_tag.get('href')
                 if link.startswith('/'):
                     link = "https://www.sportsv.net" + link
+                links.append(link)
 
-                date_tag = article.find('div', class_='date')
-                date = None
-                if date_tag:
-                    date_text = date_tag.text.strip()
-                    date = date_text
-
-                links_with_dates.append((link, date))
-
-    return links_with_dates
-
-def is_article_before_2020(date): # 判斷文章日期是否在2020年之前
-    if date:
-        try:
-            article_date = datetime.strptime(date, '%Y/%m/%d')
-            return article_date.year > 2020
-        except ValueError:
-            return False
-    return False
+    return links
 
 def get_article_soup(url): # 獲取文章內容的 BeautifulSoup 物件
     try:
@@ -62,6 +69,40 @@ def get_article_soup(url): # 獲取文章內容的 BeautifulSoup 物件
         return None
     soup = BeautifulSoup(res.text, 'html.parser')
     return soup
+
+def get_article_id(url): # 獲取文章ID
+    match = re.search(r'/articles/(\d+)$', url)
+    if not match:
+        print(f"  無法從網址獲取文章ID：{url}")
+    return match.group(1) if match else None
+
+def get_article_title(soup): # 獲取文章標題
+    title_tag = soup.find('h1')
+    if title_tag:
+        return title_tag.text.strip()
+    return "無標題"
+
+def get_article_date(soup): # 獲取文章日期
+    date_tag = soup.find('div', class_='date')
+    if date_tag:
+        date_text = date_tag.text.strip()
+        try:
+            return datetime.strptime(date_text, '%Y/%m/%d').strftime('%Y/%m/%d')
+        except ValueError:
+            return "unknown"
+    return "unknown"
+
+def get_article_topic(soup): # 獲取文章主題
+    topic_tag = soup.find("ul", class_="crumb")
+    if topic_tag:
+        topic = topic_tag.find('a').text.strip()
+        return topic
+    return "unknown"
+def get_article_author(soup): # 獲取作者名稱
+    author_tag = soup.find('div', class_='author_name')
+    if author_tag:
+        return author_tag.find('a').text.strip()
+    return "unknown"
 
 def get_article_tags(soup): # 獲取文章標籤
     tag_list = soup.select('ul.tagcloud-list li a')
@@ -84,10 +125,12 @@ def get_article_content(url): # 獲取文章內容
     soup = get_article_soup(url)
     if soup is None:
         return None
-    article_id = re.search(r'/articles/(\d+)$', url).group(1) if re.search(r'/articles/(\d+)$', url) else None # 文章ID
-    title = soup.find('h1').text.strip() # 文章標題
+    article_id = get_article_id(url) # 文章ID
+    title = get_article_title(soup) # 文章標題
+    date = get_article_date(soup) # 文章日期
+    topic = get_article_topic(soup) # 文章主題
     full_content = "" # 文章內容
-    author = soup.find('div', class_='author_name').find('a').text.strip() # 作者名稱
+    author = get_article_author(soup) # 作者名稱
     tags = get_article_tags(soup) # 標籤
     page_count = get_article_page_count(soup) # 文章頁數
 
@@ -95,8 +138,12 @@ def get_article_content(url): # 獲取文章內容
         page_url = f"{url}?page={page}#article_top"
         print(f"     爬取第 {page} 頁內文：{page_url}")
         soup = get_article_soup(page_url) # 獲取頁面內容
-        content_tags = soup.find_all("p")
-        content = "\n".join(p.text.strip() for p in content_tags if p.text.strip())
+        article_content_div = soup.find("div", class_="article-content")
+        if article_content_div:
+            content_tags = article_content_div.find_all("p")
+            content = "\n".join(p.text.strip() for p in content_tags if p.text.strip())
+        else:
+            content = ""
         if not content:
             break
         full_content += content + "\n\n"
@@ -104,6 +151,8 @@ def get_article_content(url): # 獲取文章內容
     return {
         "id": article_id,
         "title": title,
+        "date": date,
+        "topic": topic,
         "author_name": author,
         "tags": tags,
         "article-content": full_content.strip() if full_content else None
@@ -120,24 +169,20 @@ def main():
     for i in range(1, MAX_PAGES + 1):
         print(f" 正在抓取第 {i} 頁文章連結...")
 
-        links_with_dates = get_article_links(i)
+        links = get_basketball_article_links(i)
 
-        if not links_with_dates:
+        if not links:
             print(f" 第 {i} 頁沒有找到文章，跳過。")
             continue
 
-        for index, (url, date) in enumerate(links_with_dates, start=1):
-            if is_article_before_2020(date):
-                print(f" [{index}/{len(links_with_dates)}] 爬取中：{url} (日期：{date})")
+        for index, url in enumerate(links, start=1):
+                print(f" [{index}/{len(links)}] 爬取中：{url})")
                 article_data = get_article_content(url)
                 if article_data and article_data["article-content"]:
-                    article_data["date"] = date  # 加入日期欄位
                     all_articles.append(article_data)
                     print(f"   完成：{url}")
                 else:
                     print(f"   失敗：{url}")
-            else:
-                print(f"   跳過：{url} (日期：{date})")
 
     save_articles_to_json(all_articles, OUTPUT_FILE)
     print(f"✅ 所有符合條件的文章已存入 {OUTPUT_FILE}")
