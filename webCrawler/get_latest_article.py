@@ -68,7 +68,7 @@ def main():
             continue
 
         for index, url in enumerate(links, start=1):
-                print(f" [{index}/{len(links)}] 爬取中：{url})")
+                print(f" [{index}/{len(links)}] 爬取中：{url}")
                 article_data = get_article_content(url)
                 if article_data and article_data["article-content"]:
                     all_articles.append(article_data)
