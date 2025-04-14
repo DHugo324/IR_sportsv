@@ -12,8 +12,10 @@ def get_basketball_article_id_from_page(page_num): # 爬取籃球專區的文章
         print(f"  第 {page_num} 頁請求失敗")
         return []
     latest_articles_section = soup.find('section', id='latest_articles')
+    if latest_articles_section is None:
+        print(f"  第 {page_num} 頁未找到最新文章區域")
+        return []
     articles = latest_articles_section.find_all('div', class_='col-md-7')
-
     ids = [] # 儲存文章id
     for article in articles:
         h3_tag = article.find('h3')
