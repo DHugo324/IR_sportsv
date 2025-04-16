@@ -1,9 +1,10 @@
 import os
 import json
+from datetime import datetime
 from article_crawler import get_article_soup, get_article_id, get_article_content
 
 MAX_PAGES = 1  # 爬取的頁數
-OUTPUT_DIR = "basketball_articles"  # 儲存資料的資料夾
+OUTPUT_DIR = "../articles"  # 儲存資料的資料夾
 
 def get_basketball_article_ids(page_num): # 爬取籃球專區的文章ID
     url = f'https://www.sportsv.net/basketball?page={page_num}#latest_articles'
@@ -53,10 +54,6 @@ def get_basketball_article_links(page_num): # 爬取籃球專區的文章連結
                 links.append(link)
     return links
 
-import os
-import json
-from datetime import datetime
-
 def save_article_to_json(article_data):
     article_id = article_data.get("id") or get_article_id(article_data.get("url", "unknown"))
     date_str = article_data.get("date")
@@ -64,7 +61,7 @@ def save_article_to_json(article_data):
         year = datetime.strptime(date_str, "%Y/%m/%d").year
     except (ValueError, TypeError):
         year = "unknown"
-    base_dir = os.path.join(os.path.dirname(__file__), "../articles", str(year))
+    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR, str(year))
     os.makedirs(base_dir, exist_ok=True)
     filename = f"{article_id}.json"
     filepath = os.path.join(base_dir, filename)
