@@ -45,6 +45,7 @@ def get_article_topic(soup): # 獲取文章主題
         topic = topic_tag.find('a').text.strip()
         return topic
     return "unknown"
+
 def get_article_author(soup): # 獲取作者名稱
     author_tag = soup.find('div', class_='author_name')
     if author_tag:
