@@ -3,7 +3,13 @@ import json
 from datetime import datetime
 from article_crawler import get_article_soup, get_article_id, get_article_content
 
-MAX_PAGES = 1  # 爬取的頁數
+while True:
+    START_PAGES = int(input("請輸入爬取起始頁數："))  # 爬取的起始頁數
+    END_PAGES = int(input("請輸入爬取結束頁數："))  # 爬取的結束頁數
+    if START_PAGES > END_PAGES:
+        print("起始頁數必須小於或等於結束頁數，請重新輸入。")
+    else:
+        break
 OUTPUT_DIR = "../articles"  # 儲存資料的資料夾
 
 def get_basketball_article_ids(page_num): # 爬取籃球專區的文章ID
@@ -56,29 +62,37 @@ def get_basketball_article_links(page_num): # 爬取籃球專區的文章連結
 
 def save_article_to_json(article_data):
     article_id = article_data.get("id") or get_article_id(article_data.get("url", "unknown"))
-    date_str = article_data.get("date")
-    try:
-        year = datetime.strptime(date_str, "%Y/%m/%d").year
-    except (ValueError, TypeError):
-        year = "unknown"
-    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR, str(year))
+    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR)
     os.makedirs(base_dir, exist_ok=True)
     filename = f"{article_id}.json"
     filepath = os.path.join(base_dir, filename)
     with open(filepath, "w", encoding="utf-8") as file:
         json.dump(article_data, file, indent=4, ensure_ascii=False)
 
+def check_article_exists(article_id): # 檢查文章是否已存在
+    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR)
+    filename = f"{article_id}.json"
+    filepath = os.path.join(base_dir, filename)
+    return os.path.exists(filepath)
 
 def main():
-    print(f"開始爬取 {MAX_PAGES} 頁的文章...")
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)  # 如果資料夾不存在則創建
+    print(f"✅ 開始爬取籃球專區最新文章...")
+    print(f"  爬取頁數範圍：{START_PAGES} ~ {END_PAGES}")
+    print(f"  儲存資料夾：{OUTPUT_DIR}")
 
-    for i in range(1, MAX_PAGES + 1):
+    for i in range(START_PAGES, END_PAGES + 1):
         print(f" 正在抓取第 {i} 頁文章連結...")
         links = get_basketball_article_links(i)
         if not links:
             print(f" 第 {i} 頁沒有找到文章，跳過。")
             continue
         for index, url in enumerate(links, start=1):
+            id = get_article_id(url)
+            if check_article_exists(id):
+                print(f"   ❌ 已存在文章ID：{id}")
+                continue
             print(f" [{index}/{len(links)}] 爬取中：{url}")
             article_data = get_article_content(url)
             if article_data and article_data.get("article-content"):
