@@ -77,7 +77,7 @@ def get_article_content(url): # 獲取文章內容
     title = get_article_title(soup) # 文章標題
     date = get_article_date(soup) # 文章日期
     topic = get_article_topic(soup) # 文章主題
-    full_content = "" # 文章內容
+    content = [] # 文章內容
     author = get_article_author(soup) # 作者名稱
     tags = get_article_tags(soup) # 標籤
     page_count = get_article_page_count(soup) # 文章頁數
@@ -89,12 +89,12 @@ def get_article_content(url): # 獲取文章內容
         article_content_div = soup.find("div", class_="article-content")
         if article_content_div:
             content_tags = article_content_div.find_all("p")
-            content = "\n".join(p.text.strip() for p in content_tags if p.text.strip())
-        else:
-            content = ""
-        if not content:
-            break
-        full_content += content + "\n\n"
+            # 過濾掉空白和包含<a>標籤的段落，並且不包含在<table>中的段落
+            for p in content_tags:
+                if p.find("a") or p.find_parent("table"):
+                    continue
+                if p.text.strip():
+                    content.append(p.text.strip())
 
     return {
         "id": article_id,
@@ -103,5 +103,5 @@ def get_article_content(url): # 獲取文章內容
         "topic": topic,
         "author_name": author,
         "tags": tags,
-        "article-content": full_content.strip() if full_content else None
+        "article-content": content
     }
