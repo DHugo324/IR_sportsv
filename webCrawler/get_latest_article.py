@@ -13,7 +13,7 @@ while True:
 OUTPUT_DIR = "../articles"  # 儲存資料的資料夾
 
 def get_basketball_article_ids(page_num): # 爬取籃球專區的文章ID
-    url = f'https://www.sportsv.net/basketball?page={page_num}#latest_articles'
+    url = f'https://www.sportsv.net/basketball/nba?page={page_num}#latest_articles'
     soup = get_article_soup(url) # 獲取頁面內容
     if soup is None:
         print(f"  第 {page_num} 頁請求失敗")
