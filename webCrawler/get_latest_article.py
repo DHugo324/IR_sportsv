@@ -38,7 +38,7 @@ def get_basketball_article_ids(page_num): # 爬取籃球專區的文章ID
     return ids
 
 def get_basketball_article_links(page_num): # 爬取籃球專區的文章連結
-    url = f'https://www.sportsv.net/basketball?page={page_num}#latest_articles'
+    url = f'https://www.sportsv.net/basketball/nba?page={page_num}#latest_articles'
     soup = get_article_soup(url)
     if soup is None:
         print(f"  第 {page_num} 頁請求失敗")
