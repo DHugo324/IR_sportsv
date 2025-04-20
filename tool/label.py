@@ -43,7 +43,6 @@ class LabelingApp:
         self.text = tk.Text(master, wrap=tk.WORD, height=25, width=80)
         self.text.pack(padx=10, pady=(5, 10))
 
-        # 單選
         self.selected_tag = tk.StringVar(value="")
 
         for tag in TAGS:
