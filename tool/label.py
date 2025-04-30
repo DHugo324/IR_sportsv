@@ -4,7 +4,8 @@ import random
 import tkinter as tk
 from tkinter import messagebox
 
-ARTICLE_DIR = './articles'
+ARTICLE_DIR = './articles/unlabeled_articles'  # 未標記的 JSON 檔資料夾
+OUTPUT_DIR = './articles/training_articles'  # 標記後輸出的資料夾
 TAGS = [
     "賽事戰報",
     "球隊分析",
@@ -92,6 +93,7 @@ class LabelingApp:
 
                 title = data.get("title", "（無標題）")
                 article_id = data.get("id", "（無 ID）")
+                print(f"正在標記🔍 {article_id}《{title}》")
                 self.meta_label.config(text=f"ID：{article_id}\n標題：{title}")
 
                 content = "\n\n".join(data.get('article-content', []))
