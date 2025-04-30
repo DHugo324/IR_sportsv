@@ -1,6 +1,10 @@
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
+from dotenv import load_dotenv
+import os
+import google.generativeai as genai
+from langchain_google_genai import GoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
@@ -22,6 +26,14 @@ def load_llm(model_name="llama3", temperature=0.7):
     #初始化LLM
     return Ollama(model=model_name, temperature=temperature)
 
+def load_gemini():
+    load_dotenv()
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    return GoogleGenerativeAI(
+        model="models/gemini-2.0-flash",
+        google_api_key = GOOGLE_API_KEY
+    )
+
 def load_prompt():
     template = """
     你是一位專業的籃球分析師，請根據以下文章內容回答使用者的問題。
@@ -37,7 +49,7 @@ def load_prompt():
 
 def main():
     retriever = load_retriever()
-    llm = load_llm()
+    llm = load_gemini()
     prompt = load_prompt()
     qa_chain = LLMChain(llm=llm, prompt=prompt)
 
