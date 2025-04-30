@@ -2,7 +2,7 @@ import fasttext
 
 # 訓練模型
 model = fasttext.train_supervised(
-    input="fasttext_train.txt",   # 之前轉出的資料檔
+    input="./classification/fasttext_train.txt",   # 之前轉出的資料檔
     epoch=35,                     # 訓練輪數
     lr=1.0,                       # 學習率
     wordNgrams=2,                 # 使用n-gram提升表達能力
