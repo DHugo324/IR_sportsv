@@ -6,7 +6,11 @@ OUTPUT_FILE = "fasttext_train.txt"  # FastText訓練輸出檔
 
 def json_to_fasttext_line(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            print(f"⚠️ 無法解析 JSON 檔案：{json_path}")
+            return None
     
     # 只轉換有標記 category 的資料
     if "category" not in data or not data["category"]:
