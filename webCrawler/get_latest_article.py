@@ -10,8 +10,9 @@ while True:
         print("起始頁數必須小於或等於結束頁數，請重新輸入。")
     else:
         break
-OUTPUT_DIR = "../articles"  # 儲存資料的資料夾
-
+OUTPUT_DIR = "../articles/unlabeled_articles"  # 儲存資料的資料夾
+ARTICLE_DIR = "../articles"
+ID_LIST_FILE = "article_id_list.txt"  # 儲存文章ID的檔案名稱
 def get_basketball_article_ids(page_num): # 爬取籃球專區的文章ID
     url = f'https://www.sportsv.net/basketball/nba?page={page_num}#latest_articles'
     soup = get_article_soup(url) # 獲取頁面內容
@@ -70,10 +71,44 @@ def save_article_to_json(article_data):
         json.dump(article_data, file, indent=4, ensure_ascii=False)
 
 def check_article_exists(article_id): # 檢查文章是否已存在
-    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR)
-    filename = f"{article_id}.json"
-    filepath = os.path.join(base_dir, filename)
-    return os.path.exists(filepath)
+    base_dir = os.path.join(os.path.dirname(__file__), ARTICLE_DIR)
+    txt_filepath = os.path.join(base_dir, ID_LIST_FILE)
+    # 確保 article_id 是字串，以進行比較
+    article_id_str = str(article_id)
+    # 檢查檔案是否存在
+    if not os.path.exists(txt_filepath):
+        print(f"警告：列表檔案 {txt_filepath} 不存在，視為 article_id 不存在。")
+        return False
+    try:
+        # 打開檔案並逐行讀取
+        with open(txt_filepath, 'r', encoding='utf-8') as f:
+            for line in f:
+                # 去除行尾的換行符和可能的空白
+                if line.strip() == article_id_str:
+                    return True # 找到匹配項，返回 True
+        # 遍歷完所有行都沒找到
+        return False
+    except Exception as e:
+        print(f"讀取檔案 {txt_filepath} 時發生錯誤: {e}")
+        return False # 讀取錯誤，視為 article_id 不存在
+
+def add_article_id_to_list_file(article_id):
+    article_id_str = str(article_id)
+    if check_article_exists(article_id_str):
+        # print(f"Article ID '{article_id_str}' 已存在於列表檔案中，無需重複添加。") # 可以選擇是否印出提示
+        return # ID 已存在，直接返回
+    # --- 如果 ID 不存在，則添加到檔案末尾 ---
+    base_dir = os.path.join(os.path.dirname(__file__), ARTICLE_DIR)
+    txt_filepath = os.path.join(base_dir, ID_LIST_FILE)
+    # 確保目標目錄存在
+    os.makedirs(base_dir, exist_ok=True)
+    try:
+        with open(txt_filepath, 'a', encoding='utf-8') as f:
+            f.write(article_id_str + '\n') # 寫入 ID，並換行以便下一條記錄
+        # print(f"Article ID '{article_id_str}' 已成功添加到列表檔案 {txt_filepath}。")
+
+    except Exception as e:
+        print(f"添加 Article ID '{article_id_str}' 到檔案 {txt_filepath} 時發生錯誤: {e}")
 
 def main():
     if not os.path.exists(OUTPUT_DIR):
@@ -97,6 +132,7 @@ def main():
             article_data = get_article_content(url)
             if article_data and article_data.get("article-content"):
                 save_article_to_json(article_data)
+                add_article_id_to_list_file(id)
                 print(f"   ✅ 完成並儲存：{url}")
             else:
                 print(f"   ❌ 失敗：{url}")
