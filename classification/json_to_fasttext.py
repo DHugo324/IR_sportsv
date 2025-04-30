@@ -1,8 +1,8 @@
 import os
 import json
 
-INPUT_DIR = "./articles"  # 你放json檔的資料夾
-OUTPUT_FILE = "fasttext_train.txt"  # FastText訓練輸出檔
+INPUT_DIR = "./articles/training_articles"  # 你放json檔的資料夾
+OUTPUT_FILE = "./classification/fasttext_train.txt"  # FastText訓練輸出檔
 
 def json_to_fasttext_line(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
