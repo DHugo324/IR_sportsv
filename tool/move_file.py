@@ -6,32 +6,11 @@ import shutil # 用於移動檔案，比 os.rename 更強大
 # 請將 '你的來源資料夾路徑' 替換成實際的來源資料夾路徑
 source_folder = './articles/unlabeled_articles' # 來源資料夾路徑
 # 請將 '你的目標資料夾路徑' 替換成實際要存放檔案的目標資料夾路徑
-destination_folder = './articles/unlabeled_articles'
-dest_folder2 = './articles/training_articles'
+destination_folder = './articles/training_articles'
+# destination_folder = './articles/unlabeled_articles'
 # --- 配置結束 ---
 
 def move_json_without_category(src_folder, dest_folder):
-    """
-    檢查來源資料夾中的 JSON 檔案，若缺少 'category' 鍵則移動到目標資料夾。
-
-    Args:
-        src_folder (str): 來源資料夾路徑。
-        dest_folder (str): 目標資料夾路徑。
-    """
-    # 1. 檢查來源資料夾是否存在
-    if not os.path.isdir(src_folder):
-        print(f"錯誤：來源資料夾 '{src_folder}' 不存在或不是一個有效的資料夾。")
-        return # 結束函數執行
-
-    # 2. 確保目標資料夾存在，如果不存在就建立它
-    try:
-        os.makedirs(dest_folder, exist_ok=True) # exist_ok=True 表示如果資料夾已存在，不會拋出錯誤
-        print(f"來源資料夾: {os.path.abspath(src_folder)}")
-        print(f"目標資料夾: {os.path.abspath(dest_folder)}")
-    except OSError as e:
-        print(f"錯誤：無法建立目標資料夾 '{dest_folder}': {e}")
-        return # 結束函數執行
-
     moved_count = 0
     processed_count = 0
     error_count = 0
@@ -52,22 +31,8 @@ def move_json_without_category(src_folder, dest_folder):
                 with open(source_path, 'r', encoding='utf-8') as f:
                     data = json.load(f) # 解析 JSON
 
-                # 6. 檢查 JSON 內容是否為字典（物件）且是否缺少 'category' 鍵
-                #    只檢查最上層的 key
-                # if isinstance(data, dict) and 'category' not in data:
-                #     destination_path = os.path.join(dest_folder, filename)
-                #     print(f"  -> 偵測到缺少 'category' 鍵。準備移動至: {destination_path}")
-
-                #     # 7. 移動檔案
-                #     try:
-                #         shutil.move(source_path, destination_path)
-                #         moved_count += 1
-                #         print(f"  -> 檔案已成功移動。")
-                #     except Exception as move_e:
-                #         print(f"  -> 錯誤：移動檔案 '{filename}' 時發生錯誤: {move_e}")
-                #         error_count += 1
                 if isinstance(data,dict) and 'category' in data:
-                    destination_path = os.path.join(dest_folder2, filename)
+                    destination_path = os.path.join(dest_folder, filename)
                     print(f"  -> 偵測到 'category' 鍵。準備移動至: {destination_path}")
                     try:
                         shutil.move(source_path, destination_path)
@@ -81,7 +46,7 @@ def move_json_without_category(src_folder, dest_folder):
                 elif not isinstance(data, dict):
                      print(f"  -> JSON 根目錄不是物件 (dictionary)，略過 '{filename}'。")
                 else:
-                    print(f"  -> 包含 'category' 鍵，檔案保留在來源資料夾。")
+                    print(f"  -> 不包含 'category' 鍵，檔案保留在來源資料夾。")
 
             except json.JSONDecodeError:
                 print(f"  -> 錯誤：無法解析 JSON 檔案 '{filename}'。檔案可能已損毀或格式不正確。")
@@ -105,7 +70,8 @@ def move_json_without_category(src_folder, dest_folder):
     print(f"總共掃描的 JSON 檔案數: {processed_count}")
     print(f"成功移動的檔案數: {moved_count}")
     print(f"處理過程中發生錯誤的檔案數: {error_count}")
-
+def move_file():
+    move_json_without_category(source_folder, destination_folder)
 # --- 主程式執行 ---
 if __name__ == "__main__":
     # 呼叫函數，開始執行移動操作
