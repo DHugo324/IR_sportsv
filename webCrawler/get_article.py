@@ -111,8 +111,10 @@ def add_article_id_to_list_file(article_id):
         print(f"添加 Article ID '{article_id_str}' 到檔案 {txt_filepath} 時發生錯誤: {e}")
 
 def main():
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)  # 如果資料夾不存在則創建
+    base_dir = os.path.join(os.path.dirname(__file__), OUTPUT_DIR)
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+        print(f"✅ 資料夾 {base_dir} 不存在，已自動創建。")
     print(f"✅ 開始爬取籃球專區最新文章...")
     print(f"  爬取頁數範圍：{START_PAGES} ~ {END_PAGES}")
     print(f"  儲存資料夾：{OUTPUT_DIR}")
