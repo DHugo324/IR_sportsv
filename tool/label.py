@@ -10,16 +10,20 @@ TAGS = [
     "賽事戰報",
     "球隊分析",
     "球員焦點",
-    "人事異動",
-    "歷史回顧"
+    "交易與簽約",
+    "教練與管理層",
+    "選秀與新秀",
+    "歷史與專題"
 ]
 
 TAG_DESCRIPTIONS = {
     "賽事戰報": "各類賽事及時賽後報導、分析",
-    "球隊分析": "球隊表現預測、球隊近況、球隊未來展望、薪資空間",
-    "球員焦點": "球員潛在買家、球員表現分析",
-    "人事異動": "球員選秀籤交易、教練/管理層",
-    "歷史回顧": "球員回顧、歷史故事、經典賽事回顧"
+    "球隊分析": "球隊表現預測、球隊近況、球隊未來展望、薪資空間", # 若文章以球隊為主角、討論補強方向與名單
+    "球員焦點": "球員潛力預測、球員表現分析、個人評析", # 若文章以球員為主角、分析其潛在買家
+    "交易與簽約": "球員簽約、球員選秀籤交易、教練/管理層",
+    "教練與管理層": "教練/管理層變動",
+    "選秀與新秀": "選秀分析、年輕球員介紹與預測",
+    "歷史與專題": "歷史回顧、人物專訪、經典賽事回顧"
 }
 
 class LabelingApp:
@@ -61,6 +65,7 @@ class LabelingApp:
 
         self.skip_button = tk.Button(self.button_frame, text="略過", command=self.load_next_article)
         self.skip_button.grid(row=0, column=1, padx=10)
+        self.print_label_statistics()  # 印出統計
 
         self.load_next_article()
 
@@ -119,6 +124,30 @@ class LabelingApp:
             json.dump(self.article_data, f, ensure_ascii=False, indent=2)
 
         self.load_next_article()
+    
+    def print_label_statistics(self):
+        tag_counts = {tag: 0 for tag in TAGS}
+        others = 0
+
+        for f in self.all_files:
+            path = os.path.join(ARTICLE_DIR, f)
+            try:
+                with open(path, 'r', encoding='utf-8') as fp:
+                    data = json.load(fp)
+                    categories = data.get("category", [])
+                    for cat in categories:
+                        if cat in tag_counts:
+                            tag_counts[cat] += 1
+                        else:
+                            others += 1
+            except Exception as e:
+                print(f"讀取 {f} 時發生錯誤：{e}")
+
+        print("\n📊 目前各分類數量：")
+        for tag, count in tag_counts.items():
+            print(f"{tag}：{count} 篇")
+        if others:
+            print(f"（其他未定義標籤：{others} 篇）")
 
 if __name__ == "__main__":
     root = tk.Tk()
