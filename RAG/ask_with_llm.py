@@ -49,7 +49,7 @@ def load_prompt():
 
 def main():
     retriever = load_retriever()
-    llm = load_gemini()
+    llm = load_llm()
     prompt = load_prompt()
     qa_chain = LLMChain(llm=llm, prompt=prompt)
 
