@@ -43,7 +43,7 @@ def load_prompt():
     相關內容：
     {context}
 
-    請用清楚的中文詳細且簡潔回答，約100字。
+    請用清楚的中文簡潔回答。
     """
     return PromptTemplate.from_template(template)
 
