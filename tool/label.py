@@ -25,7 +25,8 @@ TAG_DESCRIPTIONS = {
     "選秀觀察": "選秀分析、球隊選秀預測",
     "歷史與專題": "歷史回顧、人物專訪、經典賽事回顧、特殊專題"
 }
-
+for i in TAG_DESCRIPTIONS:
+    print(f"{i}：{TAG_DESCRIPTIONS[i]}")
 class LabelingApp:
     def __init__(self, master):
         self.master = master
