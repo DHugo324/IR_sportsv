@@ -3,6 +3,7 @@ import json
 import random
 import tkinter as tk
 from tkinter import messagebox
+import move_file
 
 ARTICLE_DIR = './articles/unlabeled_articles'  # 未標記的 JSON 檔資料夾
 OUTPUT_DIR = './articles/training_articles'  # 標記後輸出的資料夾
@@ -72,17 +73,23 @@ class LabelingApp:
 
     def update_status_label(self):
         labeled_count = 0
-        for f in self.all_files:
-            path = os.path.join(ARTICLE_DIR, f)
-            with open(path, 'r', encoding='utf-8') as fp:
+        total_count = len(self.all_files)  # 原始總數（未標記文章）
+
+        # **計算已標記的文章數量**
+        for f in os.listdir(OUTPUT_DIR):  # 改為遍歷 `training_articles`
+            path = os.path.join(OUTPUT_DIR, f)
+            if os.path.isfile(path) and f.endswith('.json'):
                 try:
-                    data = json.load(fp)
-                    if data.get("category"):
-                        labeled_count += 1
+                    with open(path, 'r', encoding='utf-8') as fp:
+                        data = json.load(fp)
+                        if data.get("category"):  # 確保有標記
+                            labeled_count += 1
                 except json.JSONDecodeError:
-                    continue
-        total = len(self.all_files)
-        self.status_label.config(text=f"已標記 {labeled_count} / {total} 篇")
+                    print(f"警告：無法解析 {f}，跳過！")
+
+        # **更新 UI**
+        self.status_label.config(text=f"已標記 {labeled_count} / {total_count} 篇")
+
 
     def load_next_article(self):
         self.update_status_label()
@@ -123,30 +130,38 @@ class LabelingApp:
         path = os.path.join(ARTICLE_DIR, self.current_file)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.article_data, f, ensure_ascii=False, indent=2)
-
+        print(f"已標記為 {selected_tag}", end="")
+        move_file.move_json_file(self.current_file, ARTICLE_DIR, OUTPUT_DIR)  # 移動檔案到 training_articles 資料夾
         self.load_next_article()
     
     def print_label_statistics(self):
         tag_counts = {tag: 0 for tag in TAGS}
         others = 0
 
-        for f in self.all_files:
-            path = os.path.join(ARTICLE_DIR, f)
-            try:
-                with open(path, 'r', encoding='utf-8') as fp:
-                    data = json.load(fp)
-                    categories = data.get("category", [])
-                    for cat in categories:
-                        if cat in tag_counts:
-                            tag_counts[cat] += 1
-                        else:
-                            others += 1
-            except Exception as e:
-                print(f"讀取 {f} 時發生錯誤：{e}")
-
         print("\n📊 目前各分類數量：")
+
+        # **遍歷 training_articles 資料夾**
+        for f in os.listdir(OUTPUT_DIR):
+            path = os.path.join(OUTPUT_DIR, f)
+            
+            if os.path.isfile(path) and f.endswith('.json'):  # 確保是 JSON 檔案
+                try:
+                    with open(path, 'r', encoding='utf-8') as fp:
+                        data = json.load(fp)
+                        categories = data.get("category", [])
+                        
+                        for cat in categories:
+                            if cat in tag_counts:
+                                tag_counts[cat] += 1
+                            else:
+                                others += 1
+                except Exception as e:
+                    print(f"⚠️ 讀取 {f} 時發生錯誤：{e}")
+
+        # **印出各分類統計**
         for tag, count in tag_counts.items():
             print(f"{tag}：{count} 篇")
+        
         if others:
             print(f"（其他未定義標籤：{others} 篇）")
 
