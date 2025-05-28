@@ -3,24 +3,31 @@ import json
 import random
 import tkinter as tk
 from tkinter import messagebox
+import move_file
 
-ARTICLE_DIR = './articles'
+ARTICLE_DIR = './articles/unlabeled_articles'  # 未標記的 JSON 檔資料夾
+OUTPUT_DIR = './articles/training_articles'  # 標記後輸出的資料夾
 TAGS = [
     "賽事戰報",
     "球隊分析",
     "球員焦點",
-    "人事異動",
-    "歷史回顧"
+    "交易與簽約",
+    "教練與管理層",
+    "選秀觀察",
+    "歷史與專題"
 ]
 
 TAG_DESCRIPTIONS = {
-    "賽事戰報": "各類賽事及時賽後報導、分析",
-    "球隊分析": "球隊表現預測、球隊近況、球隊未來展望、薪資空間",
-    "球員焦點": "球員潛在買家、球員表現分析",
-    "人事異動": "球員選秀籤交易、教練/管理層",
-    "歷史回顧": "球員回顧、歷史故事、經典賽事回顧"
+    "賽事戰報": "各類賽事及時賽後報導、賽前分析",
+    "球隊分析": "球隊表現預測、球隊近況、球隊未來展望、薪資空間", # 若文章以球隊為主角、討論補強方向與名單
+    "球員焦點": "球員潛力預測、球員表現分析、個人評析", # 若文章以球員為主角、分析其潛在買家
+    "交易與簽約": "自由市場球員簽約、球員選秀籤交易", # 已完成的交易與簽約
+    "教練與管理層": "教練/管理層變動，教練評析",
+    "選秀觀察": "選秀分析、球隊選秀預測",
+    "歷史與專題": "歷史回顧、人物專訪、經典賽事回顧、特殊專題"
 }
-
+for i in TAG_DESCRIPTIONS:
+    print(f"{i}：{TAG_DESCRIPTIONS[i]}")
 class LabelingApp:
     def __init__(self, master):
         self.master = master
@@ -60,22 +67,29 @@ class LabelingApp:
 
         self.skip_button = tk.Button(self.button_frame, text="略過", command=self.load_next_article)
         self.skip_button.grid(row=0, column=1, padx=10)
+        self.print_label_statistics()  # 印出統計
 
         self.load_next_article()
 
     def update_status_label(self):
         labeled_count = 0
-        for f in self.all_files:
-            path = os.path.join(ARTICLE_DIR, f)
-            with open(path, 'r', encoding='utf-8') as fp:
+        total_count = len(self.all_files)  # 原始總數（未標記文章）
+
+        # **計算已標記的文章數量**
+        for f in os.listdir(OUTPUT_DIR):  # 改為遍歷 `training_articles`
+            path = os.path.join(OUTPUT_DIR, f)
+            if os.path.isfile(path) and f.endswith('.json'):
                 try:
-                    data = json.load(fp)
-                    if data.get("category"):
-                        labeled_count += 1
+                    with open(path, 'r', encoding='utf-8') as fp:
+                        data = json.load(fp)
+                        if data.get("category"):  # 確保有標記
+                            labeled_count += 1
                 except json.JSONDecodeError:
-                    continue
-        total = len(self.all_files)
-        self.status_label.config(text=f"已標記 {labeled_count} / {total} 篇")
+                    print(f"警告：無法解析 {f}，跳過！")
+
+        # **更新 UI**
+        self.status_label.config(text=f"已標記 {labeled_count} / {total_count} 篇")
+
 
     def load_next_article(self):
         self.update_status_label()
@@ -92,6 +106,7 @@ class LabelingApp:
 
                 title = data.get("title", "（無標題）")
                 article_id = data.get("id", "（無 ID）")
+                print(f"正在標記🔍 {article_id}《{title}》")
                 self.meta_label.config(text=f"ID：{article_id}\n標題：{title}")
 
                 content = "\n\n".join(data.get('article-content', []))
@@ -115,8 +130,40 @@ class LabelingApp:
         path = os.path.join(ARTICLE_DIR, self.current_file)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.article_data, f, ensure_ascii=False, indent=2)
-
+        print(f"已標記為 {selected_tag}", end="")
+        move_file.move_json_file(self.current_file, ARTICLE_DIR, OUTPUT_DIR)  # 移動檔案到 training_articles 資料夾
         self.load_next_article()
+    
+    def print_label_statistics(self):
+        tag_counts = {tag: 0 for tag in TAGS}
+        others = 0
+
+        print("\n📊 目前各分類數量：")
+
+        # **遍歷 training_articles 資料夾**
+        for f in os.listdir(OUTPUT_DIR):
+            path = os.path.join(OUTPUT_DIR, f)
+            
+            if os.path.isfile(path) and f.endswith('.json'):  # 確保是 JSON 檔案
+                try:
+                    with open(path, 'r', encoding='utf-8') as fp:
+                        data = json.load(fp)
+                        categories = data.get("category", [])
+                        
+                        for cat in categories:
+                            if cat in tag_counts:
+                                tag_counts[cat] += 1
+                            else:
+                                others += 1
+                except Exception as e:
+                    print(f"⚠️ 讀取 {f} 時發生錯誤：{e}")
+
+        # **印出各分類統計**
+        for tag, count in tag_counts.items():
+            print(f"{tag}：{count} 篇")
+        
+        if others:
+            print(f"（其他未定義標籤：{others} 篇）")
 
 if __name__ == "__main__":
     root = tk.Tk()
