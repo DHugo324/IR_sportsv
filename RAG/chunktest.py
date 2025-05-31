@@ -5,8 +5,8 @@ from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # 設定資料夾
-ARTICLE_DIR = "./articles"
-MAX_TEST_DOCS = 300  # 只拿前 10 篇測試
+ARTICLE_DIR = "./articles/training_articles"
+MAX_TEST_DOCS = 600  # 只拿前 10 篇測試
 
 def load_documents(folder_path, max_docs=MAX_TEST_DOCS):
     documents = []
@@ -44,7 +44,7 @@ def test_chunk_settings(documents, chunk_size, chunk_overlap):
 
 if __name__ == "__main__":
     docs = load_documents(ARTICLE_DIR)
-
+    print(f"總共 {len(docs)} 篇文章")
     # 想要比較的參數組合
     settings = [
         (300, 50),
