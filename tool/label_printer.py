@@ -1,7 +1,8 @@
 import os
 import json
 
-ARTICLE_DIR = './articles/unlabeled_articles'
+ARTICLE_DIR = './articles/training_articles'
+ARTICLE_DIR2 = './articles/unlabeled_articles'
 OUTPUT_FILE = 'labeled_summary.txt'
 
 def generate_summary():
@@ -13,6 +14,28 @@ def generate_summary():
             continue
 
         path = os.path.join(ARTICLE_DIR, fname)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                title = data.get('title', '（無標題）')
+                article_id = data.get('id', '無ID')
+                display = f" - {title} ({article_id})"
+
+                categories = data.get('category', [])
+                if categories:
+                    for cat in categories:
+                        grouped.setdefault(cat, []).append(display)
+                else:
+                    uncategorized.append(display)
+
+        except Exception as e:
+            print(f"❌ 錯誤：無法讀取 {fname} - {e}")
+
+    for fname in os.listdir(ARTICLE_DIR2):
+        if not fname.endswith('.json'):
+            continue
+
+        path = os.path.join(ARTICLE_DIR2, fname)
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
