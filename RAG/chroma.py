@@ -5,7 +5,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
-ARTICLE_DIR = "./articles"      
+ARTICLE_DIR = "./articles/training_articles"      
 PERSIST_DIR = "./chroma_store"   
 MAX_ARTICLES = 99999             
 
