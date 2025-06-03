@@ -43,13 +43,13 @@ def load_prompt():
     相關內容：
     {context}
 
-    請用清楚的中文簡潔回答。
+    請用清楚的中文詳細回答(200字以內)，並以最新文章內容來回答，不要使用「文章」或「段落」等詞彙。
     """
     return PromptTemplate.from_template(template)
 
 def main():
     retriever = load_retriever()
-    llm = load_llm()
+    llm = load_gemini()
     prompt = load_prompt()
     qa_chain = LLMChain(llm=llm, prompt=prompt)
 

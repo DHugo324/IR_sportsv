@@ -1,3 +1,5 @@
 *.bin
 /tokenization/data
 .env
+chroma_store/chroma.sqlite3
+chroma_store/7ee43cd6-5ed2-4b89-b94d-0c1c18ce0cba/index_metadata.pickle
