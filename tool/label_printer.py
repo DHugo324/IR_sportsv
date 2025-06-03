@@ -3,7 +3,7 @@ import json
 
 ARTICLE_DIR = './articles/training_articles'
 ARTICLE_DIR2 = './articles/unlabeled_articles'
-OUTPUT_FILE = 'labeled_summary.txt'
+OUTPUT_FILE = './articles/article_summary.txt'
 
 def generate_summary():
     grouped = {}
