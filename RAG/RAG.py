@@ -25,14 +25,16 @@ def load_llm(model_name="llama3", temperature=0.7):
 # 載入 prompt 模板
 def load_prompt():
     template = """
-    你是一位專業的籃球分析師，請根據以下文章內容回答使用者的問題。
+    你是一位專業的籃球分析師，請根據以下文章內容，用繁體中文詳細回答使用者的問題。
+    請注意：不要使用英文、拼音、emoji、或任何非中文的詞語。
 
-    問題：{question}
+    問題：
+    {question}
 
     相關內容：
     {context}
 
-    請用清楚的中文簡潔回答。
+    請使用條理清晰、中文流暢的語句回答，必要時可以列點說明。
     """
     return PromptTemplate.from_template(template)
 
