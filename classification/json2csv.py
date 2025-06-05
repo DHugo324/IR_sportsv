@@ -26,7 +26,10 @@ for filename in os.listdir(INPUT_DIR):
             with open(path, 'r', encoding='utf-8') as f:
                 article = json.load(f)
                 content = article.get("article-content", [])
-                text = " ".join(content)  # 合併段落
+                title = article.get("title", "").strip()  # 取得標題
+                content = article.get("article-content", [])
+                text = " ".join(content)  
+                # text = f"{title} " + " ".join(content) # 合併內容
 
                 categories = article.get("category", [])
                 if not categories:
