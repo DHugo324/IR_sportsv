@@ -3,8 +3,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
-from langchain_google_genai import GoogleGenerativeAI
+#import google.generativeai as genai
+#from langchain_google_genai import GoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
@@ -22,7 +22,7 @@ def load_retriever(persist_dir="chroma_store", model_name="BAAI/bge-small-zh-v1.
     )
     return retriever
 
-def load_llm(model_name="llama3", temperature=0.7):
+def load_llm(model_name="qwen:7b", temperature=0.7):
     #初始化LLM
     return Ollama(model=model_name, temperature=temperature)
 
