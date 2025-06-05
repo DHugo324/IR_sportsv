@@ -14,10 +14,10 @@ for filename in os.listdir(json_folder):
         with open(os.path.join(json_folder, filename), "r", encoding="utf-8") as file:
             data = json.load(file)
             filtered_data = {
-                "id": data["id"],
-                "title": data["title"],
-                "predicted_category": data["predicted_category"],
-                "confidence": data["confidence"]
+                "id": data.get("id"),
+                "title": data.get("title"),
+                "predicted_category": data.get("predicted_category"),
+                "confidence": data.get("confidence")
             }
             data_list.append(filtered_data)
 
