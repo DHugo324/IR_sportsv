@@ -56,7 +56,7 @@ for cat in TARGET_CATEGORIES:
         out_path = os.path.join(OUTPUT_DIR, filename)
         with open(out_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        os.remove(SOURCE_DIR + '/' + filename)  # 刪除原始檔案
-        print(f"   🔗 原始檔案已刪除：{SOURCE_DIR}/{filename}")
+        os.remove(os.path.join(SOURCE_DIR, filename))  # 刪除原始檔案
+        print(f"   🔗 原始檔案已刪除：{os.path.join(SOURCE_DIR, filename)}")
 
 print("\n✅ 所有低信心文章已輸出完成")
