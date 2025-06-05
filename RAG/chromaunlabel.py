@@ -76,5 +76,7 @@ def create_or_update_chroma_vectorstore(documents, persist_dir=PERSIST_DIR):
 
 
 if __name__ == "__main__":
-    docs = load_documents_from_folder(ARTICLE_DIR)
+    docs = []
+    docs += load_documents_from_folder("./articles/training_articles")
+    docs += load_documents_from_folder("./articles/unlabeled_articles")
     create_or_update_chroma_vectorstore(docs)
