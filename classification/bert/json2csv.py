@@ -4,7 +4,7 @@ import pandas as pd
 
 # 設定資料夾路徑
 INPUT_DIR = './articles/training_articles'
-OUTPUT_CSV = './articles/training_data.csv'
+OUTPUT_CSV = './articles/training_data_with_title.csv'
 
 # 類別標籤對應表
 label_map = {
@@ -28,8 +28,8 @@ for filename in os.listdir(INPUT_DIR):
                 content = article.get("article-content", [])
                 title = article.get("title", "").strip()  # 取得標題
                 content = article.get("article-content", [])
-                text = " ".join(content)  
-                # text = f"{title} " + " ".join(content) # 合併內容
+                # text = " ".join(content)  
+                text = f"{title} " + " ".join(content) # 合併內容
 
                 categories = article.get("category", [])
                 if not categories:

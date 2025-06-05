@@ -1,6 +1,6 @@
 # IR_sportsv
-IR project
-## 功能
-1. 結合RAG實作問答助手
-2. 最新文章趨勢分析
-3. 作者文章類型分析
+IR project，以資訊檢索技術為網站新增資訊分析功能
+## Functions
+1. Article Categorization
+2. RAG-based Q&A Assistant
+3. Related Article Recommendations
