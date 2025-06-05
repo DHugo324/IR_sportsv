@@ -1,7 +1,7 @@
 import pandas as pd
 
 # 讀取 CSV 檔案
-df = pd.read_csv("classification\\predict_summary.csv")
+df = pd.read_csv("classification/bert/predict_summary.csv")
 
 # 定義固定的類別順序（可依需求調整）
 category_order = ["球員焦點", "賽事戰報", "球隊分析", "交易與簽約", "歷史與專題", "選秀觀察", "教練與管理層"]

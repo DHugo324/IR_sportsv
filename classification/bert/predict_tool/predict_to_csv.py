@@ -3,7 +3,7 @@ import json
 import os
 
 # 設定 JSON 檔案所在的資料夾
-json_folder = "articles\predicted_articles"
+json_folder = "articles/predicted_articles"
 
 # 創建一個空的列表來存儲篩選後的 JSON 數據
 data_list = []
@@ -25,6 +25,6 @@ for filename in os.listdir(json_folder):
 df = pd.DataFrame(data_list)
 
 # 將 DataFrame 儲存為 CSV 檔案
-df.to_csv("./classification/predict_summary.csv", index=False, encoding="utf-8-sig")
+df.to_csv("./classification/bert/predict_summary.csv", index=False, encoding="utf-8-sig")
 
 print("CSV 檔案已成功儲存！")
